@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  mysql:
+    container_name: onycom-mysql
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: onycom
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    networks:
+      - onycom-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+networks:
+  onycom-network:
