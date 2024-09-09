@@ -21,7 +21,7 @@ func main() {
     r := gin.Default()
 
 	// 라우팅 경로 설정
-    routes.SetupRoutes(r)
+    routes.SetupRoutes(r, db)
 
 	// HTTP 서버 실행 (포트 8080)
 	r.Run()
