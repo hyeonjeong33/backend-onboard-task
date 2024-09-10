@@ -24,26 +24,36 @@ func (s *BoardService) CreateBoard(board models.Board) error {
     return nil
 }
 
-func (s *BoardService) GetBoards() ([]dto.BoardResponse, error) {
+    func (s *BoardService) GetBoards(page int, limit int) ([]dto.BoardResponse, int64, error) {
     var boards []models.Board
-    var boardResponses []dto.BoardResponse
+    var total int64
 
-    if err := s.DB.Find(&boards).Error; err != nil {
-        return nil, errors.New("게시글 목록 조회에 실패했습니다.")
+    offset := (page - 1) * limit
+
+    if err := s.DB.Limit(limit).Offset(offset).Find(&boards).Error; err != nil {
+        return nil, 0, errors.New("게시글 목록 조회에 실패했습니다.")
     }
 
-    for _, board := range boards {
-        boardResponse := dto.BoardResponse{
-            ID:      board.ID,
-            Title:   board.Title,
-            Content: board.Content,
-            Views:   board.Views,
-            CreatedAt: board.CreatedAt,
-        }
-        boardResponses = append(boardResponses, boardResponse)
-    }
+    if err := s.DB.Model(&models.Board{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+    if err := s.DB.Limit(limit).Offset(offset).Find(&boards).Error; err != nil {
+		return nil, 0, err
+	}
+    
+    boardResponses := make([]dto.BoardResponse, len(boards))
+    for i, board := range boards {
+		boardResponses[i] = dto.BoardResponse{
+			ID:        board.ID,
+			Title:     board.Title,
+			Content:   board.Content,
+			Views:     board.Views,
+			CreatedAt: board.CreatedAt,
+		}
+	}
        
-    return boardResponses, nil
+    return boardResponses, total, nil
 }
 
 func (s *BoardService) GetBoardByID(id string) (*dto.BoardResponse, error) {

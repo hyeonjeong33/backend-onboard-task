@@ -44,13 +44,25 @@ func (c *BoardController) CreateBoard(ctx *gin.Context) {
 
 // 게시글 목록 조회
 func (c *BoardController) GetBoards(ctx *gin.Context) {
-    boards, err := c.BoardService.GetBoards()
+    page, limit, err := helpers.GetPaginationParams(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+    boards, total, err := c.BoardService.GetBoards(page, limit)
     if err != nil {
         ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
 
-    ctx.JSON(http.StatusOK, gin.H{"boards": boards})
+    ctx.JSON(http.StatusOK, gin.H{
+        "boards": boards,
+        "total":  total,
+        "page":   page,
+        "limit":  limit,
+        
+    })
 }
 
 // 게시글 상세 조회
