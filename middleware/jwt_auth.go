@@ -11,7 +11,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
         tokenString := c.GetHeader("Authorization")
 
         if tokenString == "" {
-            c.JSON(http.StatusUnauthorized, gin.H{"error": "인증 토큰이 필요합니다."})
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "토큰 정보가 없습니다."})
             c.Abort()
             return
         }
